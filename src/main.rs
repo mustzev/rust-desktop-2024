@@ -1,10 +1,12 @@
 use iced::{
     widget::{button, text},
-    Element,
+    Element, Theme,
 };
 
 fn main() -> iced::Result {
-    iced::run("Rust Desktop 2024", update, view)
+    iced::application("Rust Desktop 2024", update, view)
+        .theme(theme)
+        .run()
 }
 
 #[derive(Debug, Clone)]
@@ -13,18 +15,22 @@ enum Message {
 }
 
 #[derive(Default)]
-struct Counter {
-    value: u32,
+struct State {
+    counter: u32,
 }
 
-fn update(counter: &mut Counter, message: Message) {
+fn update(state: &mut State, message: Message) {
     match message {
-        Message::Increment => counter.value += 1,
+        Message::Increment => state.counter += 1,
     }
 }
 
-fn view(counter: &Counter) -> Element<Message> {
-    button(text(counter.value))
+fn view(state: &State) -> Element<Message> {
+    button(text(state.counter))
         .on_press(Message::Increment)
         .into()
+}
+
+fn theme(_state: &State) -> Theme {
+    Theme::TokyoNight
 }
