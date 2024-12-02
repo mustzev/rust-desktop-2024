@@ -1,49 +1,49 @@
 mod screen;
 
-use iced::{
-    application,
-    widget::{button, text},
-    Element, Theme,
-};
-use screen::{screen1::Screen1, screen2::Screen2};
+use iced::{application, widget::text, Element, Task, Theme};
+use screen::{screen1, screen2};
 
 fn main() -> iced::Result {
-    application("Rust Desktop 2024", update, view)
-        .theme(theme)
-        .run()
+    application("Rust Desktop 2024", App::update, App::view)
+        .theme(App::theme)
+        .run_with(move || App::new(true))
 }
 
-pub struct App {
+enum Screen {
+    Screen1(screen1::Screen1),
+    Screen2(screen2::Screen2),
+}
+
+struct App {
     screen: Screen,
 }
 
-pub enum Screen {
-    Screen1(Screen1),
-    Screen2(Screen2),
-}
-
-#[derive(Default)]
-struct State {
-    counter: u32,
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 enum Message {
-    Increment,
+    Screen1(screen1::Message),
+    Screen2(screen2::Message),
 }
 
-fn theme(_state: &State) -> Theme {
-    Theme::TokyoNight
-}
-
-fn update(state: &mut State, message: Message) {
-    match message {
-        Message::Increment => state.counter += 1,
+impl App {
+    fn new(initialize: bool) -> (App, Task<Message>) {
+        match initialize {
+            true => (
+                App {
+                    screen: Screen::Screen1(screen1::Screen1 {}),
+                },
+                Task::none(),
+            ),
+            false => todo!(),
+        }
     }
-}
 
-fn view(state: &State) -> Element<Message> {
-    button(text(state.counter))
-        .on_press(Message::Increment)
-        .into()
+    fn update(&mut self, message: Message) {}
+
+    fn view(&self) -> Element<Message> {
+        text("main").into()
+    }
+
+    fn theme(&self) -> Theme {
+        Theme::TokyoNight
+    }
 }
