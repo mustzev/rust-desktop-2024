@@ -1,6 +1,6 @@
 mod screen;
 
-use iced::{application, widget::text, Element, Task, Theme};
+use iced::{application, Element, Task, Theme};
 use screen::{screen1, screen2};
 
 fn main() -> iced::Result {
@@ -37,10 +37,21 @@ impl App {
         }
     }
 
-    fn update(&mut self, message: Message) {}
+    fn update(&mut self, message: Message) {
+        match message {
+            Message::Screen1(message) => match message {
+                screen1::Message::GoToScreen2 => self.screen = Screen::Screen2(screen2::Screen2 {}),
+            },
+            Message::Screen2(message) => todo!(),
+        }
+    }
 
     fn view(&self) -> Element<Message> {
-        text("main").into()
+        let screen = match &self.screen {
+            Screen::Screen1(screen1) => screen1.view().map(Message::Screen1),
+            Screen::Screen2(screen2) => screen2.view().map(Message::Screen2),
+        };
+        screen.into()
     }
 
     fn theme(&self) -> Theme {
