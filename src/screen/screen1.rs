@@ -1,6 +1,7 @@
 use iced::{
-    widget::{button, column, text},
-    Element,
+    widget::{button, center, column, text},
+    Alignment::Center,
+    Element, Font, Task, Theme,
 };
 
 pub struct Screen1 {}
@@ -10,17 +11,37 @@ pub enum Message {
     GoToScreen2,
 }
 
+pub enum Action {
+    GoToScreen2,
+}
+
+const NAME: &str = "screen1";
+
 impl Screen1 {
-    pub fn new() -> Self {
-        Screen1 {}
+    pub fn new() -> (Self, Task<Message>) {
+        (Self {}, Task::none())
     }
 
-    pub fn update(&mut self, message: Message) {}
+    pub fn title(&self) -> String {
+        format!("{NAME} - App")
+    }
 
-    pub fn view<'a>(&self) -> Element<'a, Message> {
-        column![]
-            .push(text("screen-1"))
-            .push(button(text("go to screen-2")).on_press(Message::GoToScreen2))
-            .into()
+    pub fn update(&mut self, message: Message) -> Action {
+        match message {
+            Message::GoToScreen2 => Action::GoToScreen2,
+        }
+    }
+
+    pub fn view(&self, _theme: Theme) -> Element<Message> {
+        let title = text(NAME).font(Font::MONOSPACE);
+        let button = button(text("Go to screen2")).on_press(Message::GoToScreen2);
+        center(
+            column![title, button]
+                .max_width(600)
+                .spacing(10)
+                .align_x(Center),
+        )
+        .padding(10)
+        .into()
     }
 }
