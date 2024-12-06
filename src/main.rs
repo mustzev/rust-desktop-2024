@@ -2,7 +2,10 @@ mod data;
 mod screen;
 
 use iced::{futures::future, system, Element, Task, Theme};
-use screen::{screen1, screen2, Screen};
+use screen::{
+    poetry::{self, Poetry},
+    screen1, screen2, Screen,
+};
 
 fn main() -> iced::Result {
     iced::application(App::title, App::update, App::view)
@@ -20,6 +23,7 @@ enum Message {
     Loaded { system: Box<system::Information> },
     Screen1(screen1::Message),
     Screen2(screen2::Message),
+    Poetry(poetry::Message),
 }
 
 impl App {
@@ -42,6 +46,7 @@ impl App {
             Screen::Loading => "Loading".to_owned(),
             Screen::Screen1(screen1) => screen1.title(),
             Screen::Screen2(screen2) => screen2.title(),
+            Screen::Poetry(poetry) => poetry.title(),
         }
     }
 
@@ -49,9 +54,12 @@ impl App {
         match message {
             Message::Loaded { system } => {
                 self.system = Some(*system);
-                let (screen1, task) = screen1::Screen1::new();
-                self.screen = Screen::Screen1(screen1);
-                task.map(Message::Screen1)
+                // let (screen1, task) = screen1::Screen1::new();
+                // self.screen = Screen::Screen1(screen1);
+                // task.map(Message::Screen1)
+                let (poetry, task) = poetry::Poetry::new();
+                self.screen = Screen::Poetry(poetry);
+                task.map(Message::Poetry)
             }
             Message::Screen1(message) => {
                 if let Screen::Screen1(screen1) = &mut self.screen {
@@ -82,6 +90,16 @@ impl App {
                     Task::none()
                 }
             }
+            Message::Poetry(message) => {
+                if let Screen::Poetry(poetry) = &mut self.screen {
+                    let action = poetry.update(message);
+                    match action {
+                        poetry::Action::None => Task::none(),
+                    }
+                } else {
+                    Task::none()
+                }
+            }
         }
     }
 
@@ -90,6 +108,7 @@ impl App {
             Screen::Loading => screen::loading(),
             Screen::Screen1(screen1) => screen1.view(self.theme()).map(Message::Screen1),
             Screen::Screen2(screen2) => screen2.view().map(Message::Screen2),
+            Screen::Poetry(poetry) => poetry.view().map(Message::Poetry),
         }
     }
 
