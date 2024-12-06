@@ -1,3 +1,5 @@
 # rust desktop application
-iced +
+iced (gui) +
 public apis
+
+![screenshot](screenshot/screenshot.png)
