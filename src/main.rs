@@ -2,10 +2,7 @@ mod data;
 mod screen;
 
 use iced::{futures::future, system, Element, Task, Theme};
-use screen::{
-    poetry::{self, Poetry},
-    screen1, screen2, Screen,
-};
+use screen::{poetry, screen1, screen2, Screen};
 
 fn main() -> iced::Result {
     iced::application(App::title, App::update, App::view)
