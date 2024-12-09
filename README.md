@@ -2,4 +2,4 @@
 iced (gui) +
 public apis
 
-![screenshot](screenshot/screenshot-screen2.png)
+![screenshot](screenshot/screenshot-poetry.png)

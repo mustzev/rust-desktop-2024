@@ -51,9 +51,11 @@ impl App {
         match message {
             Message::Loaded { system } => {
                 self.system = Some(*system);
+
                 // let (screen1, task) = screen1::Screen1::new();
                 // self.screen = Screen::Screen1(screen1);
                 // task.map(Message::Screen1)
+
                 let (poetry, task) = poetry::Poetry::new();
                 self.screen = Screen::Poetry(poetry);
                 task.map(Message::Poetry)
@@ -89,10 +91,8 @@ impl App {
             }
             Message::Poetry(message) => {
                 if let Screen::Poetry(poetry) = &mut self.screen {
-                    let action = poetry.update(message);
-                    match action {
-                        poetry::Action::None => Task::none(),
-                    }
+                    let task = poetry.update(message);
+                    task.map(Message::Poetry)
                 } else {
                     Task::none()
                 }

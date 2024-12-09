@@ -20,10 +20,10 @@ struct Title {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Poetry {
-    author: String,
-    title: String,
-    lines: Vec<String>,
-    linecount: String,
+    pub author: String,
+    pub title: String,
+    pub lines: Vec<String>,
+    // linecount: String,
 }
 
 impl FetchPoetry {
@@ -44,7 +44,7 @@ impl FetchPoetry {
         Ok(authors_res.authors)
     }
 
-    pub async fn fetch_titles(self, author: &str) -> Result<Vec<String>, Error> {
+    pub async fn fetch_titles(self, author: String) -> Result<Vec<String>, Error> {
         let titles_res = self
             .client
             .get(format!("{POETRYDB_URL}/author/{author}/title"))
@@ -59,7 +59,7 @@ impl FetchPoetry {
         Ok(titles)
     }
 
-    pub async fn fetch_poetry(self, title: &str) -> Result<Poetry, Error> {
+    pub async fn fetch_poetry(self, title: String) -> Result<Poetry, Error> {
         let poetry_res = self
             .client
             .get(format!("{POETRYDB_URL}/title/{title}:abs"))

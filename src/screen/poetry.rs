@@ -1,5 +1,5 @@
 use iced::{
-    widget::{button, column, container, text, text_input, Column},
+    widget::{button, column, container, mouse_area, row, scrollable, text, text_input, Column},
     Element, Task,
 };
 
@@ -26,10 +26,6 @@ pub enum Message {
     PoetryFetched(PoetryStruct),
 }
 
-pub enum Action {
-    None,
-}
-
 const NAME: &str = "Poetry";
 
 impl Poetry {
@@ -54,27 +50,48 @@ impl Poetry {
         format!("{NAME} - App")
     }
 
-    pub fn update(&mut self, message: Message) -> Action {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::BackButtonPressed => todo!(),
             Message::SearchChanged(search) => {
                 self.search = search;
-                Action::None
+                Task::none()
             }
             Message::AuthorsFetched(authors) => {
                 self.authors = authors;
-                Action::None
+                Task::none()
             }
-            Message::AuthorSelected(_) => todo!(),
-            Message::TitlesFetched(_) => todo!(),
-            Message::TitleSelected(_) => todo!(),
-            Message::PoetryFetched(_poetry) => todo!(),
+            Message::AuthorSelected(author) => {
+                self.author = author.to_owned();
+                if author.is_some() {
+                    Task::future(self.fetch_poetry.to_owned().fetch_titles(author.unwrap()))
+                        .map(|result| Message::TitlesFetched(result.unwrap()))
+                } else {
+                    Task::none()
+                }
+            }
+            Message::TitlesFetched(titles) => {
+                self.titles = titles;
+                Task::none()
+            }
+            Message::TitleSelected(title) => {
+                self.title = title.to_owned();
+                if title.is_some() {
+                    Task::future(self.fetch_poetry.to_owned().fetch_poetry(title.unwrap()))
+                        .map(|result| Message::PoetryFetched(result.unwrap()))
+                } else {
+                    Task::none()
+                }
+            }
+            Message::PoetryFetched(poetry) => {
+                self.poetry = Some(poetry);
+                Task::none()
+            }
         }
     }
 
     pub fn view(&self) -> Element<Message> {
         let to_select_author = self.author.is_none();
-        let _to_select_title = self.title.is_none();
         let content = column![]
             .push(button(text("<")).on_press(Message::BackButtonPressed))
             .push(
@@ -82,33 +99,75 @@ impl Poetry {
                     if to_select_author {
                         "Search author..."
                     } else {
-                        "Search title.."
+                        "Search title..."
                     },
                     &self.search,
                 )
                 .on_input(Message::SearchChanged),
             )
-            .push(text(if to_select_author {
-                "Authors"
-            } else {
-                "Titles"
-            }))
-            .push(if to_select_author {
-                Column::with_children(
-                    self.authors
-                        .iter()
-                        .map(|author| text(author).into())
-                        .collect::<Vec<Element<Message>>>(),
-                )
-            } else {
-                Column::with_children(
-                    self.titles
-                        .iter()
-                        .map(|title| text(title).into())
-                        .collect::<Vec<Element<Message>>>(),
-                )
-            })
-            .spacing(10);
-        container(content).padding(10).into()
+            .push(
+                row![]
+                    .push(
+                        column![
+                            text("Authors"),
+                            scrollable(Column::with_children(
+                                self.authors
+                                    .iter()
+                                    .map(|author| {
+                                        mouse_area(text(author))
+                                            .on_press(Message::AuthorSelected(Some(
+                                                author.to_owned(),
+                                            )))
+                                            .into()
+                                    })
+                                    .collect::<Vec<Element<Message>>>(),
+                            ))
+                            .width(300),
+                        ]
+                        .spacing(10),
+                    )
+                    .push(
+                        column![
+                            text("Titles"),
+                            scrollable(Column::with_children(
+                                self.titles
+                                    .iter()
+                                    .map(|title| {
+                                        mouse_area(text(title))
+                                            .on_press(Message::TitleSelected(Some(
+                                                title.to_owned(),
+                                            )))
+                                            .into()
+                                    })
+                                    .collect::<Vec<Element<Message>>>(),
+                            ))
+                            .width(300),
+                        ]
+                        .spacing(10),
+                    )
+                    .push(
+                        column![
+                            text("Poetry"),
+                            match &self.poetry {
+                                Some(poetry) => column![
+                                    text(format!("{} - {}", poetry.author, poetry.title)),
+                                    Column::with_children(
+                                        poetry
+                                            .lines
+                                            .iter()
+                                            .map(|line| text(line).into())
+                                            .collect::<Vec<Element<Message>>>(),
+                                    )
+                                ]
+                                .spacing(10),
+                                None => column![text("Select author and title")],
+                            }
+                        ]
+                        .spacing(10),
+                    )
+                    .spacing(10),
+            )
+            .spacing(20);
+        container(content).padding(15).into()
     }
 }
