@@ -4,6 +4,7 @@ use iced::{
     Element, Font, Task, Theme,
 };
 
+#[derive(Clone)]
 pub struct Screen1 {}
 
 #[derive(Debug, Clone)]

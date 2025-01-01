@@ -3,6 +3,7 @@ use iced::{
     Element, Task,
 };
 
+#[derive(Clone)]
 pub struct Screen2 {
     input: String,
 }

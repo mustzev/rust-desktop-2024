@@ -1,8 +1,10 @@
 mod data;
 mod screen;
+mod widget;
 
-use iced::{futures::future, system, Element, Task, Theme};
+use iced::{futures::future, system, widget::row, Element, Task, Theme};
 use screen::{poetry, screen1, screen2, Screen};
+use widget::sidebar::{self, Sidebar};
 
 fn main() -> iced::Result {
     iced::application(App::title, App::update, App::view)
@@ -11,13 +13,15 @@ fn main() -> iced::Result {
 }
 
 struct App {
-    screen: Screen,
     system: Option<system::Information>,
+    sidebar: Sidebar,
+    screen: Screen,
 }
 
 #[derive(Debug, Clone)]
 enum Message {
     Loaded { system: Box<system::Information> },
+    Sidebar(sidebar::Message),
     Screen1(screen1::Message),
     Screen2(screen2::Message),
     Poetry(poetry::Message),
@@ -27,8 +31,9 @@ impl App {
     pub fn new() -> (Self, Task<Message>) {
         (
             Self {
-                screen: Screen::Loading,
                 system: None,
+                sidebar: Sidebar::new(Screen::Loading),
+                screen: Screen::Loading,
             },
             Task::future(future::ok::<bool, bool>(true)).then(|_| {
                 system::fetch_information()
@@ -49,13 +54,12 @@ impl App {
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
+            Message::Sidebar(message) => {
+                let task = self.sidebar.update(message);
+                task.map(Message::Sidebar)
+            }
             Message::Loaded { system } => {
                 self.system = Some(*system);
-
-                // let (screen1, task) = screen1::Screen1::new();
-                // self.screen = Screen::Screen1(screen1);
-                // task.map(Message::Screen1)
-
                 let (poetry, task) = poetry::Poetry::new();
                 self.screen = Screen::Poetry(poetry);
                 task.map(Message::Poetry)
@@ -101,12 +105,14 @@ impl App {
     }
 
     fn view(&self) -> Element<Message> {
-        match &self.screen {
+        let sidebar = self.sidebar.view().map(Message::Sidebar);
+        let screen = match &self.screen {
             Screen::Loading => screen::loading(),
             Screen::Screen1(screen1) => screen1.view(self.theme()).map(Message::Screen1),
             Screen::Screen2(screen2) => screen2.view().map(Message::Screen2),
             Screen::Poetry(poetry) => poetry.view().map(Message::Poetry),
-        }
+        };
+        row![sidebar, screen].into()
     }
 
     fn theme(&self) -> Theme {
