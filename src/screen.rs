@@ -11,7 +11,7 @@ pub fn loading<'a, Message: 'a>() -> Element<'a, Message> {
     horizontal_space().into()
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Screen {
     Loading,
     Screen1(Screen1),

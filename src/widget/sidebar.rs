@@ -1,9 +1,9 @@
 use iced::{
-    widget::{text, Column},
-    Element, Task,
+    widget::{mouse_area, text, Column},
+    Element,
 };
 
-use crate::screen::Screen;
+use crate::screen::{poetry::Poetry, screen1::Screen1, screen2::Screen2, Screen};
 
 pub struct Sidebar {
     screen: Screen,
@@ -11,7 +11,7 @@ pub struct Sidebar {
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    ScreenChanged(String),
+    ScreenChanged(Screen),
 }
 
 impl Sidebar {
@@ -19,18 +19,29 @@ impl Sidebar {
         Self { screen }
     }
 
-    pub fn update(&mut self, message: Message) -> Task<Message> {
+    pub fn update(&mut self, message: Message) -> Screen {
         match message {
-            Message::ScreenChanged(_) => todo!(),
+            Message::ScreenChanged(screen) => {
+                self.screen = screen;
+                self.screen.clone()
+            }
         }
     }
 
     pub fn view(&self) -> Element<Message> {
-        let items = vec!["screen1", "screen2", "poetry"];
+        let items = vec![
+            ("screen1", Screen::Screen1(Screen1::default())),
+            ("screen2", Screen::Screen2(Screen2::default())),
+            ("poetry", Screen::Poetry(Poetry::default())),
+        ];
         Column::with_children(
             items
                 .iter()
-                .map(|item| text(item.to_owned()).into())
+                .map(|(label, screen)| {
+                    mouse_area(text(label.to_owned()))
+                        .on_press(Message::ScreenChanged(screen.clone()))
+                        .into()
+                })
                 .collect::<Vec<Element<Message>>>(),
         )
         .padding(10)

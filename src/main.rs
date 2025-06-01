@@ -61,8 +61,17 @@ impl App {
                 task.map(Message::Poetry)
             }
             Message::Sidebar(message) => {
-                let task = self.sidebar.update(message);
-                task.map(Message::Sidebar)
+                let screen = self.sidebar.update(message);
+                self.screen = screen;
+                match self.screen {
+                    Screen::Loading => Task::none(),
+                    Screen::Screen1(_) => Task::none(),
+                    Screen::Screen2(_) => Task::none(),
+                    Screen::Poetry(_) => {
+                        let (_poetry, task) = poetry::Poetry::new();
+                        task.map(Message::Poetry)
+                    }
+                }
             }
             Message::Screen1(message) => {
                 if let Screen::Screen1(screen1) = &mut self.screen {
@@ -70,7 +79,7 @@ impl App {
                     match action {
                         screen1::Action::GoToScreen2 => {
                             let (screen2, task) = screen2::Screen2::new();
-                            self.screen = Screen::Screen2(screen2);
+                            self.screen = screen::Screen::Screen2(screen2);
                             task.map(Message::Screen2)
                         }
                     }

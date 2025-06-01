@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 const POETRYDB_URL: &str = "https://poetrydb.org";
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct FetchPoetry {
     client: Client,
 }

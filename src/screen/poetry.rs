@@ -5,7 +5,7 @@ use iced::{
 
 use crate::data::poetry::{FetchPoetry, Poetry as PoetryStruct};
 
-#[derive(Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct Poetry {
     search: String,
     fetch_poetry: FetchPoetry,
