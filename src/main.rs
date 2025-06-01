@@ -54,15 +54,15 @@ impl App {
 
     fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::Sidebar(message) => {
-                let task = self.sidebar.update(message);
-                task.map(Message::Sidebar)
-            }
             Message::Loaded { system } => {
                 self.system = Some(*system);
                 let (poetry, task) = poetry::Poetry::new();
                 self.screen = Screen::Poetry(poetry);
                 task.map(Message::Poetry)
+            }
+            Message::Sidebar(message) => {
+                let task = self.sidebar.update(message);
+                task.map(Message::Sidebar)
             }
             Message::Screen1(message) => {
                 if let Screen::Screen1(screen1) = &mut self.screen {
